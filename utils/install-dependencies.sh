@@ -59,6 +59,18 @@ function install_dependencies_with_yum() {
         openresty-zlib-devel openresty-pcre-devel
 }
 
+# Install dependencies on openEuler
+function install_dependencies_with_yum_base_openEuler() {
+    dnf install -y gcc gcc-c++ curl patch wget git make sudo xz perl-CPAN
+    dnf install -y tar automake autoconf libtool which unzip
+    curl -o /etc/yum.repos.d/epel-OpenEuler.repo https://down.whsir.com/downloads/epel-OpenEuler.repo
+    dnf install -y --skip-broken epel-release
+    dnf install -y readline-devel
+    # install openresty dependencies
+    dnf install -y pcre pcre-devel openldap-devel
+    dnf install -y openresty-openssl111-devel openresty-pcre-devel openresty-zlib-devel
+}
+
 # Install dependencies on ubuntu and debian
 function install_dependencies_with_apt() {
     # add OpenResty source
@@ -95,6 +107,8 @@ function multi_distro_installation() {
         install_dependencies_with_apt "ubuntu"
     elif grep -Eqi "Arch" /etc/issue || grep -Eqi "EndeavourOS" /etc/issue || grep -Eq "Arch" /etc/*-release; then
         install_dependencies_with_aur
+    elif grep -Eqi "openEuler" /etc/issue || grep -Eq "openEuler" /etc/*-release; then
+        install_dependencies_with_yum_base_openEuler
     else
         echo "Non-supported distribution, APISIX is only supported on Linux-based systems"
         exit 1
@@ -113,6 +127,8 @@ function multi_distro_uninstallation() {
         sudo apt-get autoremove -y openresty-zlib-dev openresty-pcre-dev
     elif grep -Eqi "Ubuntu" /etc/issue || grep -Eq "Ubuntu" /etc/*-release; then
         sudo apt-get autoremove -y openresty-zlib-dev openresty-pcre-dev
+    elif grep -Eqi "openEuler" /etc/issue || grep -Eq "openEuler" /etc/*-release; then
+        sudo dnf autoremove -y openresty-openssl111-devel openresty-pcre-devel openresty-zlib-devel
     else
         echo "Non-supported distribution, APISIX is only supported on Linux-based systems"
         exit 1
